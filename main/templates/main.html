@@ -1,8 +1,41 @@
+{% extends 'base.html' %}
+{% block content %}
 <h1>Saturn Sports Station</h1>
 
-<h4>Aplication: </h4>
+<h5>APP:</h5>
 <p>{{ app_name }}</p>
-<h4>Name: </h4>
-<p>{{ name }}</p> 
-<h4>Class: </h4>
-<p>{{ class }}</p> 
+
+<h5>Name:</h5>
+<p>{{ name }}</p>
+
+<h5>Class:</h5>
+<p>{{ class }}</p>
+
+<a href="{% url 'main:create_product' %}">
+  <button>+ Add Product</button>
+</a>
+
+<hr>
+
+{% if not product_list %}
+<p>Belum ada produk pada Saturn Sports Station.</p>
+{% else %}
+  {% for product in product_list %}
+  <div>
+    <h2>{{ product.name }}</h2>
+    <p><b>Harga:</b> Rp{{ product.price }}</p>
+    <p><b>Kategori:</b> {{ product.category }} {% if product.is_featured %}| Featured{% endif %}</p>
+
+    {% if product.thumbnail %}
+      <img src="{{ product.thumbnail }}" alt="thumbnail" width="150" height="100"><br>
+    {% endif %}
+
+    <p>{{ product.description|truncatewords:20 }}</p>
+    <a href="{% url 'main:show_product' product.id %}">
+      <button>Detail</button>
+    </a>
+  </div>
+  <hr>
+  {% endfor %}
+{% endif %}
+{% endblock %}
