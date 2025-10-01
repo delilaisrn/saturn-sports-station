@@ -1,21 +1,89 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block meta %}
+<title>{{ product.name }} - Saturn Sports Station</title>
+{% endblock meta %}
+
 {% block content %}
-<p><a href="{% url 'main:show_main' %}"><button>← Back to List</button></a></p>
+<div class="bg-gradient-to-b from-purple-900 via-purple-800 to-purple-700 w-full min-h-screen">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-<h1>{{ product.name }}</h1>
-<p><b>Harga:</b> Rp{{ product.price }}</p>
-<p><b>Kategori:</b> {{ product.category }} {% if product.is_featured %}| Featured{% endif %}</p>
+    <!-- Back Navigation -->
+    <div class="mb-6">
+      <a href="{% url 'main:show_main' %}" class="text-purple-200 hover:text-white font-medium transition-colors">
+        ← Back to Products
+      </a>
+    </div>
 
-{% if product.thumbnail %}
-  <img src="{{ product.thumbnail }}" alt="Product thumbnail" width="300"><br><br>
-{% endif %}
+    <!-- Product Card -->
+    <article class="bg-purple-950 bg-opacity-40 border border-purple-700 rounded-lg overflow-hidden shadow-lg">
+      
+      <!-- Header -->
+      <div class="p-6 sm:p-8">
+        <div class="flex flex-wrap items-center gap-2 mb-4">
+          <span class="inline-flex items-center px-3 py-1 rounded-md text-xs font-medium bg-purple-600 text-white">
+            {{ product.category }}
+          </span>
+          {% if product.is_featured %}
+            <span class="inline-flex items-center px-3 py-1 rounded-md text-xs font-medium bg-yellow-200 text-yellow-900">
+              Featured
+            </span>
+          {% endif %}
+          {% if product.is_product_hot %}
+            <span class="inline-flex items-center px-3 py-1 rounded-md text-xs font-medium bg-red-200 text-red-900">
+              Hot
+            </span>
+          {% endif %}
+        </div>
 
-<p>{{ product.description }}</p>
+        <h1 class="text-3xl sm:text-4xl font-bold text-white leading-tight mb-4">
+          {{ product.name }}
+        </h1>
 
-{% if product.user %}
-    <p>Seller: {{ product.user.username }}</p>
-{% else %}
-    <p>Seller: Anonymous</p>
-{% endif %}
+        <div class="flex flex-wrap items-center text-sm text-purple-200 gap-4">
+          <span>Price: ${{ product.price }}</span>
+          <span>{{ product.product_views }} views</span>
+          <time datetime="{{ product.created_at|date:'c' }}">
+            {{ product.created_at|date:"M j, Y g:i A" }}
+          </time>
+        </div>
+      </div>
 
+      <!-- Product Image -->
+      {% if product.thumbnail %}
+        <div class="px-6 sm:px-8">
+          <img src="{{ product.thumbnail }}" 
+               alt="{{ product.name }}" 
+               class="w-full h-64 sm:h-80 lg:h-96 object-cover rounded-lg shadow-inner">
+        </div>
+      {% endif %}
+
+      <!-- Description -->
+      <div class="p-6 sm:p-8">
+        <div class="prose prose-lg max-w-none text-purple-200">
+          <div class="leading-relaxed whitespace-pre-line text-base sm:text-lg">
+            {{ product.description }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Seller Info -->
+      <div class="border-t border-purple-700 p-6 sm:p-8 bg-purple-950 bg-opacity-30">
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="font-medium text-white">
+              {% if product.user %}
+                <p>Seller: {{ product.user.username }}</p>
+              {% else %}
+                <p>Seller: Anonymous</p>
+              {% endif %}
+            </div>
+            <p class="text-sm text-purple-300">Added by</p>
+          </div>
+        </div>
+      </div>
+    </article>
+  </div>
+</div>
 {% endblock %}

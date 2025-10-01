@@ -22,6 +22,7 @@ def show_main(request):
     context = {
         'app_name': 'Saturn Sports Station (SSS)',
         'name': 'Delila Isrina Aroyo',
+        'npm' : '2406405374',
         'class': 'PBP A',
         'product_list': product_list,
         'last_login': request.COOKIES.get('last_login', 'Never'),
@@ -47,6 +48,10 @@ def create_product(request):
 @login_required(login_url='/login')
 def show_product(request, id):
     product = get_object_or_404(Product, pk=id)
+
+    product.product_views += 1
+    product.save(update_fields=['product_views'])
+
     return render(request, "product_detail.html", {'product': product})
 
 def show_xml(request):
@@ -104,3 +109,21 @@ def logout_user(request):
     response = HttpResponseRedirect(reverse('main:login'))
     response.delete_cookie('last_login')
     return response
+
+def edit_product(request, id):
+    product = get_object_or_404(Product, pk=id)
+    form = ProductForm(request.POST or None, instance=product)
+    if form.is_valid() and request.method == 'POST':
+        form.save()
+        return redirect('main:show_main')
+    
+    context = {
+        'form': form
+    }
+
+    return render(request, "edit_product.html", context)
+
+def delete_product(request, id):
+    product = get_object_or_404(Product, pk=id)
+    product.delete()
+    return HttpResponseRedirect(reverse('main:show_main'))

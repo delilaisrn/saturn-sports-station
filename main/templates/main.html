@@ -1,54 +1,45 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block meta %}<title>Saturn Sports Station</title>{% endblock meta %}
+
 {% block content %}
-<h1>Saturn Sports Station</h1>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-<h5>APP:</h5>
-<p>{{ app_name }}</p>
+    <!-- Header -->
+    <div class="mb-8 text-center">
+        <h1 class="text-3xl font-bold mb-2 text-purple-300">Latest Products</h1>
+        <p class="text-gray-300">Explore the newest products in our store</p>
+    </div>
 
-<h5>Name:</h5>
-<p>{{ name }}</p>
+    <!-- Filter -->
+    <div class="flex flex-wrap justify-center gap-3 mb-8">
+        <a href="?" class="px-4 py-2 rounded-md font-medium transition-colors
+            {% if request.GET.filter == 'all' or not request.GET.filter %} bg-purple-600 text-white{% else %}bg-gray-800 text-gray-300{% endif %}">
+            All Products
+        </a>
+        <a href="?filter=my" class="px-4 py-2 rounded-md font-medium transition-colors
+            {% if request.GET.filter == 'my' %} bg-purple-600 text-white{% else %}bg-gray-800 text-gray-300{% endif %}">
+            My Products
+        </a>
+    </div>
 
-<h5>Class:</h5>
-<p>{{ class }}</p>
-
-<a href="{% url 'main:create_product' %}">
-  <button>+ Add Product</button>
-</a>
-
-<a href="{% url 'main:logout' %}">
-  <button>Logout</button>
-</a>
-
-<h5>Telah login sebagai: {{ user }}</h5>
-<h5>Sesi terakhir login: {{ last_login }}</h5>
-<hr>
-
-<a href="?filter=all">
-    <button type="button">All Products</button>
-</a>
-<a href="?filter=my">
-    <button type="button">My Products</button>
-</a> 
-
-{% if not product_list %}
-<p>Belum ada produk pada Saturn Sports Station.</p>
-{% else %}
-  {% for product in product_list %}
-  <div>
-    <h2>{{ product.name }}</h2>
-    <p><b>Harga:</b> Rp{{ product.price }}</p>
-    <p><b>Kategori:</b> {{ product.category }} {% if product.is_featured %}| Featured{% endif %}</p>
-
-    {% if product.thumbnail %}
-      <img src="{{ product.thumbnail }}" alt="thumbnail" width="150" height="100"><br>
+    <!-- Product Grid -->
+    {% if not product_list %}
+        <div class="text-center py-16">
+            <img src="{% static 'image/no-product.png' %}" class="w-32 h-32 mx-auto mb-4" alt="No products">
+            <h3 class="text-lg font-medium text-purple-300 mb-2">No products found</h3>
+            <p class="text-gray-400 mb-4">Be the first to add a product to our store!</p>
+            <a href="{% url 'main:create_product' %}" class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors">
+                Add Product
+            </a>
+        </div>
+    {% else %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for product in product_list %}
+                {% include 'card_product.html' with product=product %}
+            {% endfor %}
+        </div>
     {% endif %}
-
-    <p>{{ product.description|truncatewords:20 }}</p>
-    <a href="{% url 'main:show_product' product.id %}">
-      <button>Detail</button>
-    </a>
-  </div>
-  <hr>
-  {% endfor %}
-{% endif %}
-{% endblock %}
+</div>
+{% endblock content %}
