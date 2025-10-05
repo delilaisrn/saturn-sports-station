@@ -1,8 +1,7 @@
 {% load static %}
 
 <article class="bg-purple-950 bg-opacity-40 border border-purple-700 rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300">
-  
-  <!-- Product Image -->
+  <!-- Thumbnail -->
   <div class="aspect-[16/9] relative overflow-hidden">
     {% if product.thumbnail %}
       <img src="{{ product.thumbnail }}" alt="{{ product.name }}" class="w-full h-full object-cover">
@@ -46,18 +45,26 @@
       Price: ${{ product.price }}
     </p>
 
+    <!-- Action Buttons -->
     <div class="flex items-center justify-between pt-4 border-t border-purple-700">
       <a href="{% url 'main:show_product' product.id %}" class="text-purple-300 hover:text-white font-medium text-sm transition-colors">
         View
       </a>
-      <div class="flex space-x-2">
-        <a href="{% url 'main:edit_product' product.id %}" class="text-yellow-200 hover:text-yellow-400 text-sm transition-colors">
-          Edit
-        </a>
-        <a href="{% url 'main:delete_product' product.id %}" class="text-red-400 hover:text-red-600 text-sm transition-colors">
-          Delete
-        </a>
-      </div>
+
+      {% if user.is_authenticated and product.user == user %}
+        <div class="flex items-center space-x-2 mt-2">
+          <a href="{% url 'main:edit_product' product.id %}" class="text-yellow-200 hover:text-yellow-400 text-sm transition-colors">
+            Edit
+          </a>
+          <form action="{% url 'main:delete_product' product.id %}" method="post" onsubmit="return confirm('Yakin hapus?')" class="inline-flex">
+            {% csrf_token %}
+            <button type="submit" class="text-red-400 hover:text-red-600 text-sm transition-colors">
+              Delete
+            </button>
+          </form>
+        </div>
+      {% endif %}
+
     </div>
   </div>
 </article>
