@@ -155,6 +155,12 @@
         const formData = new FormData(document.querySelector('#productForm'));
         const isEdit = !!editingProductId;
 
+        const cleanDescription = (formData.get("description") || "")
+            .replace(/\r?\n|\r/g, " ")   // ubah newline jadi spasi
+            .replace(/["']/g, "\\$&")    // escape kutip tunggal/ganda
+            .trim();
+        formData.set("description", cleanDescription);
+
         const url = isEdit
             ? `{% url 'main:edit_product' '00000000-0000-0000-0000-000000000000' %}`.replace(
                 '00000000-0000-0000-0000-000000000000',
