@@ -170,20 +170,20 @@
       : '';
 
     const editButtonHtml = `
-    <a href="#" 
-      onclick='openEditModal(${JSON.stringify({
-      id: productItem.id,
-      name: productItem.name,
-      price: productItem.price,
-      description: productItem.description,
-      category: productItem.category,
-      thumbnail: productItem.thumbnail,
-      is_featured: productItem.is_featured,
-    })})' 
-      class='text-yellow-200 hover:text-yellow-400 text-sm transition-colors'>
-      Edit
-    </a>
-  `;
+      <a href="#"
+        onclick='openEditModal(${JSON.stringify({
+          id: productItem.id,
+          name: productItem.name,
+          price: productItem.price,
+          description: productItem.description?.replace(/'/g, "\\'").replace(/"/g, '\\"').replace(/\r?\n|\r/g, '\\n'),
+          category: productItem.category,
+          thumbnail: productItem.thumbnail,
+          is_featured: productItem.is_featured,
+        })})'
+        class='text-yellow-200 hover:text-yellow-400 text-sm transition-colors'>
+        Edit
+      </a>
+    `;
 
     const editDeleteButtons = CURRENT_USER_ID && String(CURRENT_USER_ID) === String(productItem.user_id)
       ? `<div class='flex space-x-2'>
