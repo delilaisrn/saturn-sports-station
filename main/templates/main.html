@@ -14,151 +14,185 @@
       <h1 class="text-3xl font-bold text-purple-300 mb-2">Latest Products</h1>
       <p class="text-gray-400">Explore the newest products in our store</p>
     </div>
-    <button onclick="showModal()" class="inline-flex items-center px-4 py-2 bg-gray-800 text-white font-semibold border border-gray-700 rounded-md hover:bg-purple-700 hover:text-white transition-colors mb-4">
+    <button onclick="showModal()"
+      class="inline-flex items-center px-4 py-2 bg-gray-800 text-white font-semibold border border-gray-700 rounded-md hover:bg-purple-700 hover:text-white transition-colors mb-4">
       Add Product by AJAX
     </button>
 
     <!-- Filter Section -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 bg-gray-800 rounded-lg border border-gray-700 p-4">
+    <div
+      class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 bg-gray-800 rounded-lg border border-gray-700 p-4">
       <div class="flex space-x-3 mb-4 sm:mb-0">
-        <a id="filter-all" class="bg-purple-600 text-white px-4 py-2 rounded-md font-medium transition-colors hover:bg-purple-700">
+        <a id="filter-all"
+          class="bg-purple-600 text-white px-4 py-2 rounded-md font-medium transition-colors hover:bg-purple-700">
           All Products
         </a>
-        <a id="filter-my" class="bg-gray-800 text-gray-300 border border-gray-700 px-4 py-2 rounded-md font-medium transition-colors hover:bg-purple-600 hover:text-white">
+        <a id="filter-my"
+          class="bg-gray-800 text-gray-300 border border-gray-700 px-4 py-2 rounded-md font-medium transition-colors hover:bg-purple-600 hover:text-white">
           My Products
         </a>
       </div>
       {% if user.is_authenticated %}
-        <div class="text-sm text-gray-400">
-          Last login: {{ last_login }}
-        </div>
-      {% endif %}
-    </div>
-
-    <!-- Loading State -->
-    <div id="loading" class="bg-gray-800 rounded-lg border border-gray-700 p-12 text-center hidden">
-      <svg class="animate-spin h-8 w-8 text-purple-400 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
-      </svg>
-      <p class="text-purple-300 mt-3">Loading products...</p>
-    </div>
-
-    <!-- Error State -->
-    <div id="error" class="bg-red-900 border border-red-700 text-red-200 p-6 text-center rounded-lg hidden">
-      <p>Failed to load products. Please try again later.</p>
-    </div>
-
-    <!-- Product Grid -->
-    <div id="grid" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-
-    <!-- Empty State -->
-    <div id="empty" class="bg-gray-800 rounded-lg border border-gray-700 p-12 text-center hidden">
-      <div class="w-32 h-32 mx-auto mb-4">
-        <img src="{% static 'image/no-product.png' %}" alt="No products available" class="w-full h-full object-contain">
+      <div class="text-sm text-gray-400">
+        Last login: {{ last_login }}
       </div>
-      <h3 class="text-lg font-medium text-purple-300 mb-2">No products found</h3>
-      <p class="text-gray-400 mb-6">Be the first to add your product to the store.</p>
-      <a href="{% url 'main:create_product' %}" class="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors">
-        Add Product
-      </a>
+      {% endif %}
+
+      <button id="refresh-products"
+        class="inline-flex items-center px-3 py-2 bg-gray-700 text-purple-300 rounded-md hover:bg-purple-600 hover:text-white transition-colors"
+        title="Refresh products list" onclick="rotateRefreshIcon(this)">
+        <svg id="refresh-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1 transition-transform duration-500"
+          fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M4 4v6h6M20 20v-6h-6M5 19a9 9 0 0014.32-3.906M19 5a9 9 0 00-14.32 3.906" />
+        </svg>
+        Refresh
+      </button>
     </div>
   </div>
+
+  <!-- Loading State -->
+  <div id="loading" class="bg-gray-800 rounded-lg border border-gray-700 p-12 text-center hidden">
+    <svg class="animate-spin h-8 w-8 text-purple-400 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none"
+      viewBox="0 0 24 24">
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+    </svg>
+    <p class="text-purple-300 mt-3">Loading products...</p>
+  </div>
+
+  <!-- Error State -->
+  <div id="error" class="bg-red-900 border border-red-700 text-red-200 p-6 text-center rounded-lg hidden">
+    <p>Failed to load products. Please try again later.</p>
+  </div>
+
+  <!-- Product Grid -->
+  <div id="grid" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+
+  <!-- Empty State -->
+  <div id="empty" class="bg-gray-800 rounded-lg border border-gray-700 p-12 text-center hidden">
+    <div class="w-32 h-32 mx-auto mb-4">
+      <img src="{% static 'image/no-product.png' %}" alt="No products available" class="w-full h-full object-contain">
+    </div>
+    <h3 class="text-lg font-medium text-purple-300 mb-2">No products found</h3>
+    <p class="text-gray-400 mb-6">Be the first to add your product to the store.</p>
+    <a href="{% url 'main:create_product' %}"
+      class="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors">
+      Add Product
+    </a>
+  </div>
+</div>
 </div>
 
 <script>
-// Configuration
-const PRODUCT_API_ENDPOINT = "{% url 'main:show_json' %}";
-console.log("Script main.html loaded successfully")
-const CURRENT_USER_ID = "{{ user.id|default_if_none:'' }}";
+  // Configuration
+  const PRODUCT_API_ENDPOINT = "{% url 'main:show_json' %}";
+  console.log("Script main.html loaded successfully")
+  const CURRENT_USER_ID = "{{ user.id|default_if_none:'' }}";
 
-// DOM Elements
-const loadingSpinner = document.getElementById('loading');
-const errorMessage = document.getElementById('error');
-const emptyStateDisplay = document.getElementById('empty');
-const productGridContainer = document.getElementById('grid');
-const showAllProductsButton = document.getElementById('filter-all');
-const showMyProductsButton = document.getElementById('filter-my');
+  // DOM Elements
+  const loadingSpinner = document.getElementById('loading');
+  const errorMessage = document.getElementById('error');
+  const emptyStateDisplay = document.getElementById('empty');
+  const productGridContainer = document.getElementById('grid');
+  const showAllProductsButton = document.getElementById('filter-all');
+  const showMyProductsButton = document.getElementById('filter-my');
 
-// State Variables
-let activeFilter = 'all';
-let allProductData = [];
+  // State Variables
+  let activeFilter = 'all';
+  let allProductData = [];
 
-// Update filter button appearance
-function updateFilterButtonsAppearance() {
-  if (!showAllProductsButton || !showMyProductsButton) return;
-  
-  if (activeFilter === 'all') {
-    showAllProductsButton.className = 'bg-purple-600 text-white px-4 py-2 rounded-md font-medium transition-colors hover:bg-purple-700';
-    showMyProductsButton.className = 'bg-gray-800 text-gray-300 border border-gray-700 px-4 py-2 rounded-md font-medium transition-colors hover:bg-purple-600 hover:text-white';
-  } else {
-    showMyProductsButton.className = 'bg-purple-600 text-white px-4 py-2 rounded-md font-medium transition-colors hover:bg-purple-700';
-    showAllProductsButton.className = 'bg-gray-800 text-gray-300 border border-gray-700 px-4 py-2 rounded-md font-medium transition-colors hover:bg-purple-600 hover:text-white';
+  // Update filter button appearance
+  function updateFilterButtonsAppearance() {
+    if (!showAllProductsButton || !showMyProductsButton) return;
+
+    if (activeFilter === 'all') {
+      showAllProductsButton.className = 'bg-purple-600 text-white px-4 py-2 rounded-md font-medium transition-colors hover:bg-purple-700';
+      showMyProductsButton.className = 'bg-gray-800 text-gray-300 border border-gray-700 px-4 py-2 rounded-md font-medium transition-colors hover:bg-purple-600 hover:text-white';
+    } else {
+      showMyProductsButton.className = 'bg-purple-600 text-white px-4 py-2 rounded-md font-medium transition-colors hover:bg-purple-700';
+      showAllProductsButton.className = 'bg-gray-800 text-gray-300 border border-gray-700 px-4 py-2 rounded-md font-medium transition-colors hover:bg-purple-600 hover:text-white';
+    }
   }
-}
 
-// Show/hide page sections
-function displayPageSection({ showLoading = false, showError = false, showEmpty = false, showGrid = false }) {
-  loadingSpinner.classList.toggle('hidden', !showLoading);
-  errorMessage.classList.toggle('hidden', !showError);
-  emptyStateDisplay.classList.toggle('hidden', !showEmpty);
-  productGridContainer.classList.toggle('hidden', !showGrid);
+  // Show/hide page sections
+  function displayPageSection({ showLoading = false, showError = false, showEmpty = false, showGrid = false }) {
+    loadingSpinner.classList.toggle('hidden', !showLoading);
+    errorMessage.classList.toggle('hidden', !showError);
+    emptyStateDisplay.classList.toggle('hidden', !showEmpty);
+    productGridContainer.classList.toggle('hidden', !showGrid);
 
-  if (showGrid) {
-    productGridContainer.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6';
+    if (showGrid) {
+      productGridContainer.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6';
+    }
   }
-}
 
-// Get readable category name
-function getReadableCategoryName(categoryCode) {
-  const categoryMapping = {
-    accessories: 'Accessories',
-    jerseys: 'Jerseys',
-    boots: 'Boots',
-    clothing: 'Clothing',
-    'street wear': 'Street Wear',
-  };
-  return categoryMapping[categoryCode] || categoryCode;
-}
+  // Get readable category name
+  function getReadableCategoryName(categoryCode) {
+    const categoryMapping = {
+      accessories: 'Accessories',
+      jerseys: 'Jerseys',
+      boots: 'Boots',
+      clothing: 'Clothing',
+      'street wear': 'Street Wear',
+    };
+    return categoryMapping[categoryCode] || categoryCode;
+  }
 
-// Create product card element
-function buildProductCardElement(productItem) {
-  const articleElement = document.createElement('article');
-  articleElement.className = 'bg-gray-800 rounded-lg border border-gray-700 hover:shadow-lg transition-shadow duration-300 overflow-hidden flex flex-col h-full';
+  // Create product card element
+  function buildProductCardElement(productItem) {
+    const articleElement = document.createElement('article');
+    articleElement.className = 'bg-gray-800 rounded-lg border border-gray-700 hover:shadow-lg transition-shadow duration-300 overflow-hidden flex flex-col h-full';
 
-  const detailLink = `{% url 'main:show_product' '00000000-0000-0000-0000-000000000000' %}`.replace('00000000-0000-0000-0000-000000000000', productItem.id);
-  const editLink = `{% url 'main:edit_product' '00000000-0000-0000-0000-000000000000' %}`.replace('00000000-0000-0000-0000-000000000000', productItem.id);
-  const deleteLink = `{% url 'main:delete_product' '00000000-0000-0000-0000-000000000000' %}`.replace('00000000-0000-0000-0000-000000000000', productItem.id);
+    const detailLink = `{% url 'main:show_product' '00000000-0000-0000-0000-000000000000' %}`.replace('00000000-0000-0000-0000-000000000000', productItem.id);
+    const editLink = `{% url 'main:edit_product' '00000000-0000-0000-0000-000000000000' %}`.replace('00000000-0000-0000-0000-000000000000', productItem.id);
+    const deleteLink = `{% url 'main:delete_product' '00000000-0000-0000-0000-000000000000' %}`.replace('00000000-0000-0000-0000-000000000000', productItem.id);
 
-  const formattedDate = new Date(productItem.created_at).toLocaleDateString('en-US', { 
-    year: 'numeric', 
-    month: 'short', 
-    day: 'numeric' 
-  });
+    const formattedDate = new Date(productItem.created_at).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
 
-  const categoryLabel = getReadableCategoryName(productItem.category);
-  const isFeatured = productItem.is_featured;
-  const isHot = productItem.product_views > 20 || productItem.is_product_hot;
+    const categoryLabel = getReadableCategoryName(productItem.category);
+    const isFeatured = productItem.is_featured;
+    const isHot = productItem.product_views > 20 || productItem.is_product_hot;
 
-  const thumbnailHtml = productItem.thumbnail 
-    ? `<img src='${productItem.thumbnail}' alt='${productItem.name}' class='w-full h-full object-cover'>` 
-    : `<div class='w-full h-full bg-gradient-to-br from-purple-800 to-indigo-900 flex items-center justify-center'></div>`;
+    const thumbnailHtml = productItem.thumbnail
+      ? `<img src='${productItem.thumbnail}' alt='${productItem.name}' class='w-full h-full object-cover'>`
+      : `<div class='w-full h-full bg-gradient-to-br from-purple-800 to-indigo-900 flex items-center justify-center'></div>`;
 
-  const featuredBadge = isFeatured 
-    ? `<span class='inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-yellow-100 text-yellow-800'>Featured</span>` 
-    : '';
-  const hotBadge = isHot 
-    ? `<span class='inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-red-100 text-red-800'>Hot</span>` 
-    : '';
+    const featuredBadge = isFeatured
+      ? `<span class='inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-yellow-100 text-yellow-800'>Featured</span>`
+      : '';
+    const hotBadge = isHot
+      ? `<span class='inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-red-100 text-red-800'>Hot</span>`
+      : '';
 
-  const editDeleteButtons = CURRENT_USER_ID && String(CURRENT_USER_ID) === String(productItem.user_id)
-    ? `<div class='flex space-x-2'>
-        <a href='${editLink}' class='text-yellow-200 hover:text-yellow-400 text-sm transition-colors'>Edit</a>
-        <a href='${deleteLink}' class='text-red-400 hover:text-red-600 text-sm transition-colors' onclick='return confirm("Are you sure you want to delete this product?")'>Delete</a>
+    const editButtonHtml = `
+    <a href="#" 
+      onclick='openEditModal(${JSON.stringify({
+      id: productItem.id,
+      name: productItem.name,
+      price: productItem.price,
+      description: productItem.description,
+      category: productItem.category,
+      thumbnail: productItem.thumbnail,
+      is_featured: productItem.is_featured,
+    })})' 
+      class='text-yellow-200 hover:text-yellow-400 text-sm transition-colors'>
+      Edit
+    </a>
+  `;
+
+    const editDeleteButtons = CURRENT_USER_ID && String(CURRENT_USER_ID) === String(productItem.user_id)
+      ? `<div class='flex space-x-2'>
+        ${editButtonHtml}
+        <a href='#' onclick='confirmDeleteProduct("${productItem.id}")' class='text-red-400 hover:text-red-600 text-sm transition-colors'>Delete</a>
       </div>`
-    : '';
+      : '';
 
-  const completeCardHtml = `
+    const completeCardHtml = `
     <div class="aspect-[16/9] relative overflow-hidden">
       ${thumbnailHtml}
       <div class="absolute top-3 left-3">
@@ -192,84 +226,99 @@ function buildProductCardElement(productItem) {
     </div>
   `;
 
-  articleElement.innerHTML = completeCardHtml;
-  return articleElement;
-}
-
-// Render all product cards
-function renderAllProductCards(productItems) {
-  productGridContainer.innerHTML = '';
-  productItems.forEach(productItem => {
-    const cardElement = buildProductCardElement(productItem);
-    productGridContainer.appendChild(cardElement);
-  });
-}
-
-// Filter and display products
-function filterAndDisplayProducts() {
-  updateFilterButtonsAppearance();
-
-  const filteredProducts = activeFilter === 'all' 
-    ? allProductData 
-    : allProductData.filter(product => String(product.user_id) === String(CURRENT_USER_ID));
-
-  if (filteredProducts.length === 0) {
-    displayPageSection({ showEmpty: true });
-  } else {
-    renderAllProductCards(filteredProducts);
-    displayPageSection({ showGrid: true });
+    articleElement.innerHTML = completeCardHtml;
+    return articleElement;
   }
-}
 
-// Fetch product data from server
-async function fetchProductsFromServer() {
-  try {
-    displayPageSection({ showLoading: true });
-
-    const response = await fetch(PRODUCT_API_ENDPOINT, {
-      headers: { 'Accept': 'application/json' },
+  // Render all product cards
+  function renderAllProductCards(productItems) {
+    productGridContainer.innerHTML = '';
+    productItems.forEach(productItem => {
+      const cardElement = buildProductCardElement(productItem);
+      productGridContainer.appendChild(cardElement);
     });
+  }
 
-    if (!response.ok) {
-      throw new Error('Failed to fetch product data from server');
+  // Filter and display products
+  function filterAndDisplayProducts() {
+    updateFilterButtonsAppearance();
+
+    const filteredProducts = activeFilter === 'all'
+      ? allProductData
+      : allProductData.filter(product => String(product.user_id) === String(CURRENT_USER_ID));
+
+    if (filteredProducts.length === 0) {
+      displayPageSection({ showEmpty: true });
+    } else {
+      renderAllProductCards(filteredProducts);
+      displayPageSection({ showGrid: true });
+    }
+  }
+
+  // Fetch product data from server
+  async function fetchProductsFromServer() {
+    try {
+      displayPageSection({ showLoading: true });
+
+      const response = await fetch(PRODUCT_API_ENDPOINT, {
+        headers: { 'Accept': 'application/json' },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch product data from server');
+      }
+
+      const productData = await response.json();
+      allProductData = productData || [];
+
+      filterAndDisplayProducts();
+    } catch (error) {
+      console.error('Error loading products:', error);
+      displayPageSection({ showError: true });
+    }
+  }
+
+  // Event handlers
+  function handleShowAllProductsClick() {
+    activeFilter = 'all';
+    filterAndDisplayProducts();
+  }
+
+  function handleShowMyProductsClick() {
+    activeFilter = 'my';
+    filterAndDisplayProducts();
+  }
+
+  // Initialize page
+  function initializeProductPage() {
+    showAllProductsButton.addEventListener('click', handleShowAllProductsClick);
+    showMyProductsButton.addEventListener('click', handleShowMyProductsClick);
+
+    const refreshButton = document.getElementById('refresh-products');
+    if (refreshButton) {
+      refreshButton.addEventListener('click', async () => {
+        showToast('Refreshing...', 'Fetching the latest products...', 'normal');
+        await fetchProductsFromServer();
+        showToast('Products updated!', 'List refreshed successfully.', 'success');
+      });
     }
 
-    const productData = await response.json();
-    allProductData = productData || [];
-
-    filterAndDisplayProducts();
-  } catch (error) {
-    console.error('Error loading products:', error);
-    displayPageSection({ showError: true });
+    fetchProductsFromServer();
   }
-}
 
-// Event handlers
-function handleShowAllProductsClick() {
-  activeFilter = 'all';
-  filterAndDisplayProducts();
-}
+  function rotateRefreshIcon(btn) {
+    const icon = btn.querySelector('#refresh-icon');
+    icon.classList.add('animate-spin');
+    setTimeout(() => icon.classList.remove('animate-spin'), 1000);
+  }
 
-function handleShowMyProductsClick() {
-  activeFilter = 'my';
-  filterAndDisplayProducts();
-}
+  // Start application
+  initializeProductPage();
 
-// Initialize page
-function initializeProductPage() {
-  showAllProductsButton.addEventListener('click', handleShowAllProductsClick);
-  showMyProductsButton.addEventListener('click', handleShowMyProductsClick);
-
-  fetchProductsFromServer();
-}
-
-// Start application
-initializeProductPage();
-
-document.addEventListener('productAdded', function() {
+  document.addEventListener('productAdded', function () {
     // Refresh data without page reload
     fetchProductsFromServer();
-});
+  });
 </script>
 
 {% endblock content %}

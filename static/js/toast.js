@@ -22,19 +22,19 @@ function showToast(title, message, type = 'normal', duration = 3000) {
     switch (type) {
         case 'success':
             iconHTML = '✅';
-            gradientClass = 'from-green-600 via-emerald-700 to-green-800';
+            gradientClass = 'from-green-600', 'via-emerald-700', 'to-green-800';
             borderClass = 'border-green-400/50';
             textClass = 'text-green-100';
             break;
         case 'error':
             iconHTML = '⚠️';
-            gradientClass = 'from-red-700 via-pink-700 to-purple-800';
+            gradientClass = 'from-red-700', 'via-pink-700', 'to-purple-800';
             borderClass = 'border-red-400/50';
             textClass = 'text-red-100';
             break;
         default:
             iconHTML = '🌌';
-            gradientClass = 'from-purple-800 via-indigo-800 to-blue-800';
+            gradientClass = 'from-purple-800', 'via-indigo-800', 'to-blue-800';
             borderClass = 'border-purple-400/40';
             textClass = 'text-white';
             break;

@@ -115,26 +115,134 @@
         }, 150);
     }
 
-    async function addProductEntry() {
-        await fetch("{% url 'main:add_product_entry_ajax' %}", {
-            method: "POST",
-            body: new FormData(document.querySelector('#productForm')),
-        })
+    let editingProductId = null; // null = sedang create, ada ID = sedang edit
 
-        document.getElementById("productForm").reset();
-        hideModal();
+    function openCreateModal() {
+        editingProductId = null;
 
-        // Show toast notification
-        showToast('Product added successfully!', '', 'success');
+        // ubah judul & tombol modal
+        document.querySelector('#crudModal h3').textContent = 'Create New Product';
+        document.querySelector('#crudModal p').textContent = 'Add your product to Saturn Sports Station';
+        document.querySelector('#submitProduct').textContent = 'Publish Product';
 
-        // Dispatch custom event to notify main.html about new data
-        document.dispatchEvent(new CustomEvent('productAdded'));
+        // kosongin form
+        document.querySelector('#productForm').reset();
+
+        showModal();
+    }
+
+    function openEditModal(productData) {
+        editingProductId = productData.id;
+
+        // ubah judul & tombol modal
+        document.querySelector('#crudModal h3').textContent = 'Edit Product';
+        document.querySelector('#crudModal p').textContent = 'Update your product information';
+        document.querySelector('#submitProduct').textContent = 'Update Product';
+
+        // isi form dengan data lama
+        document.querySelector('#name').value = productData.name || '';
+        document.querySelector('#price').value = productData.price || '';
+        document.querySelector('#description').value = productData.description || '';
+        document.querySelector('#category').value = productData.category || '';
+        document.querySelector('#thumbnail').value = productData.thumbnail || '';
+        document.querySelector('#is_featured').checked = !!productData.is_featured;
+
+        showModal();
+    }
+
+    // ubah fungsi addProductEntry supaya otomatis jadi edit kalau editingProductId != null
+    async function addOrEditProductEntry() {
+        const formData = new FormData(document.querySelector('#productForm'));
+        const isEdit = !!editingProductId;
+
+        const url = isEdit
+            ? `{% url 'main:edit_product' '00000000-0000-0000-0000-000000000000' %}`.replace(
+                '00000000-0000-0000-0000-000000000000',
+                editingProductId
+            )
+            : `{% url 'main:add_product_entry_ajax' %}`;
+
+        try {
+            const response = await fetch(url, {
+                method: "POST",
+                body: formData,
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                },
+            });
+
+            if (response.ok) {
+                const msg = isEdit ? "Product updated successfully!" : "Product added successfully!";
+                showToast(msg, '', 'success');
+                hideModal();
+
+                if (!isEdit) {
+                    editingProductId = null;
+                    document.getElementById("productForm").reset();
+                }
+
+                // Refresh product grid di main.html
+                document.dispatchEvent(new CustomEvent('productAdded'));
+            } else {
+                console.error(await response.text());
+                showToast("Failed to save product", '', 'error');
+            }
+        } catch (error) {
+            console.error("Network error:", error);
+            showToast("Server not responding", '', 'error');
+        }
 
         return false;
     }
+
+    // ganti event listener sebelumnya
+    document.getElementById("productForm").removeEventListener("submit", addOrEditProductEntry);
     document.getElementById("productForm").addEventListener("submit", function (e) {
         e.preventDefault();
-        addProductEntry();
-    })
+        addOrEditProductEntry();
+    });
+
+    let deleteProductId = null;
+
+    function confirmDeleteProduct(productId) {
+        deleteProductId = productId;
+
+        // kalo kamu udah punya modal delete, buka di sini
+        if (document.getElementById("deleteModal")) {
+            const modal = document.getElementById("deleteModal");
+            const modalContent = document.getElementById("deleteModalContent");
+
+            modal.classList.remove("hidden");
+            setTimeout(() => {
+                modalContent.classList.remove("opacity-0", "scale-95");
+                modalContent.classList.add("opacity-100", "scale-100");
+            }, 50);
+        } else {
+            // fallback ke confirm biasa kalo belum ada modal
+            if (confirm("Are you sure you want to delete this product?")) {
+                deleteProductById(productId);
+            }
+        }
+    }
+
+    async function deleteProductById(productId) {
+        try {
+            const url = `{% url 'main:delete_product' '00000000-0000-0000-0000-000000000000' %}`.replace(
+                '00000000-0000-0000-0000-000000000000',
+                productId
+            );
+
+            const response = await fetch(url, { method: "POST" });
+            if (response.ok) {
+                showToast("Product deleted successfully!", "", "success");
+                document.dispatchEvent(new CustomEvent("productAdded"));
+            } else {
+                showToast("Failed to delete product.", "", "error");
+            }
+        } catch (err) {
+            console.error("Error deleting product:", err);
+            showToast("Server error while deleting.", "", "error");
+        }
+    }
 
 </script>

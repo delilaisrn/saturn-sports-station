@@ -53,4 +53,43 @@
     </form>
   </div>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const editForm = document.querySelector("form");
+
+  editForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const formData = new FormData(editForm);
+
+    try {
+      const response = await fetch(window.location.href, {
+        method: "POST",
+        body: formData,
+        headers: {
+          "X-Requested-With": "XMLHttpRequest",
+        },
+      });
+
+      if (response.ok) {
+        showToast("Success", "Product updated successfully!", "success");
+
+        // Redirect ke halaman utama
+        setTimeout(() => {
+          window.location.href = "{% url 'main:show_main' %}";
+        }, 1500);
+      } else {
+        const errorData = await response.json().catch(() => null);
+        console.error("Error response:", errorData);
+        showToast("Error", "Failed to update product. Try again.", "error");
+      }
+    } catch (err) {
+      console.error("Network error:", err);
+      showToast("Error", "Server not responding.", "error");
+    }
+  });
+});
+</script>
+
 {% endblock %}

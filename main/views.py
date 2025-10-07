@@ -10,7 +10,8 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_http_methods
+from django.contrib.auth.models import User
 
 @login_required(login_url='/login')
 def show_main(request):
@@ -107,57 +108,74 @@ def show_json_by_id(request, id):
     except Product.DoesNotExist:
         return JsonResponse({'detail': 'Not found'}, status=404)
     
+@csrf_exempt
 def register(request):
-    form = UserCreationForm()
-
     if request.method == "POST":
         form = UserCreationForm(request.POST)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Your account has been successfully created!')
-            return redirect('main:login')
-    context = {'form':form}
-    return render(request, 'register.html', context)
+            messages.success(request, "Your account has been successfully created!")
+            return JsonResponse({"message": "REGISTERED"}, status=201)
+        else:
+            return JsonResponse({"errors": form.errors}, status=400)
+    else:
+        form = UserCreationForm()
+        return render(request, "register.html", {"form": form})
 
+@csrf_exempt
+@require_http_methods(["GET", "POST"])
 def login_user(request):
-   if request.method == 'POST':
-      form = AuthenticationForm(data=request.POST)
+    if request.method == "GET":
+        # render halaman login
+        return render(request, "login.html")
+    
+    # kalau POST → proses AJAX login
+    username = request.POST.get("username")
+    password = request.POST.get("password")
 
-      if form.is_valid():
-        user = form.get_user()
+    user = authenticate(username=username, password=password)
+    if user is not None:
         login(request, user)
-        response = HttpResponseRedirect(reverse("main:show_main"))
+        response = HttpResponse(b"LOGGED_IN", status=200)
         response.set_cookie('last_login', str(datetime.datetime.now()))
         return response
-
-   else:
-      form = AuthenticationForm(request)
-   context = {'form': form}
-   return render(request, 'login.html', context)
-
+    else:
+        return HttpResponse(b"INVALID_CREDENTIALS", status=401)
+    
 def logout_user(request):
     logout(request)
     response = HttpResponseRedirect(reverse('main:login'))
     response.delete_cookie('last_login')
     return response
 
+@csrf_exempt
 def edit_product(request, id):
     product = get_object_or_404(Product, pk=id)
     form = ProductForm(request.POST or None, instance=product)
-    if form.is_valid() and request.method == 'POST':
-        form.save()
-        return redirect('main:show_main')
-    
-    context = {
-        'form': form
-    }
 
-    return render(request, "edit_product.html", context)
+    if request.method == "POST":
+        if form.is_valid():
+            form.save()
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({"message": "UPDATED"}, status=200)
+            return redirect('main:show_main')
+        else:
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({"errors": form.errors}, status=400)
 
+    return render(request, "edit_product.html", {"form": form})
+
+@csrf_exempt
 def delete_product(request, id):
-    product = get_object_or_404(Product, pk=id)
-    product.delete()
-    return HttpResponseRedirect(reverse('main:show_main'))
+    if request.method == "POST":
+        try:
+            product = Product.objects.get(pk=id)
+            product.delete()
+            return JsonResponse({"status": "success", "message": "Product deleted successfully!"})
+        except Product.DoesNotExist:
+            return JsonResponse({"status": "error", "message": "Product not found."}, status=404)
+    else:
+        return JsonResponse({"status": "error", "message": "Invalid request method."}, status=405)
 
 @csrf_exempt
 @require_POST
