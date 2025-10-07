@@ -170,17 +170,17 @@
       : '';
 
     const editButtonHtml = `
-      <a href="#"
-        onclick='openEditModal(${JSON.stringify({
-          id: productItem.id,
-          name: productItem.name,
-          price: productItem.price,
-          description: productItem.description?.replace(/'/g, "\\'").replace(/"/g, '\\"').replace(/\r?\n|\r/g, '\\n'),
-          category: productItem.category,
-          thumbnail: productItem.thumbnail,
-          is_featured: productItem.is_featured,
-        })})'
-        class='text-yellow-200 hover:text-yellow-400 text-sm transition-colors'>
+      <a href="#" 
+        onclick="openEditModal({
+          id: '{{ productItem.id }}',
+          name: '{{ productItem.name|escapejs }}',
+          price: '{{ productItem.price }}',
+          description: '{{ productItem.description|escapejs }}',
+          category: '{{ productItem.category|escapejs }}',
+          thumbnail: '{{ productItem.thumbnail|escapejs }}',
+          is_featured: {{ productItem.is_featured|yesno:'true,false' }}
+        })"
+        class="text-yellow-200 hover:text-yellow-400 text-sm transition-colors">
         Edit
       </a>
     `;
